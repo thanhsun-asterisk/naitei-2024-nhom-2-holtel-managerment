@@ -15,7 +15,7 @@ import lombok.Setter;
 public class BookingRoom {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne

@@ -1,10 +1,7 @@
 package com.app.models;
 import com.app.constants.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 
 @Entity
@@ -13,10 +10,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
 
     @Column(nullable = false, length = 100)
@@ -41,6 +39,4 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
-
-
 }

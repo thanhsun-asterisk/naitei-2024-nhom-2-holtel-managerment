@@ -1,6 +1,8 @@
 package com.app.config;
 
+import com.app.security.CustomAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +15,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Slf4j
 public class SecurityConfig {
+
+    private final UserDetailsService userDetailsService;
+    private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
 
     @Bean
     public static PasswordEncoder passwordEncoder() {
@@ -25,7 +32,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
+        log.info("web secu");
         // In case CSRF disabling is needed for testing
         http.csrf(csrf -> csrf.disable());
 
@@ -34,12 +41,15 @@ public class SecurityConfig {
                                 .requestMatchers("/", "/index", "/register/**").permitAll()
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
-                                .requestMatchers("/manager/**").hasRole("HOTEL_MANAGER")
+                                .requestMatchers("/manager/**").hasRole("HOTEL_STAFF")
                                 .anyRequest().authenticated())
                 .formLogin(
                         form -> form
                                 .loginPage("/login")
+                                .usernameParameter("email")
+                                .passwordParameter("password")
                                 .loginProcessingUrl("/login")
+                                .successHandler(customAuthenticationSuccessHandler)
                                 .permitAll())
                 .logout(
                         logout -> logout
@@ -47,6 +57,13 @@ public class SecurityConfig {
                                 .permitAll()
                 );
         return http.build();
+    }
+
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder());
     }
 
 
